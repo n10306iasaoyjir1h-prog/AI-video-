@@ -1,0 +1,4 @@
+data/state.json
+data/youtube-token.json
+.env
+node_modules/
