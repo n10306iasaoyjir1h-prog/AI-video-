@@ -1,0 +1,11 @@
+import { bundle } from '@remotion/bundler';
+import { renderMedia, selectComposition } from '@remotion/renderer';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const jobId = process.argv[2] || `job_${Date.now()}`;
+const project = JSON.parse(process.argv[3] || '{}');
+const entry = require.resolve('../remotion/src/index.tsx');
+const bundleLocation = await bundle({ entryPoint: entry, webpackOverride: config => config });
+const composition = await selectComposition({ serveUrl: bundleLocation, id: 'StorylineVideo', inputProps: { project } });
+await renderMedia({ composition, serveUrl: bundleLocation, codec: 'h264', outputLocation: `out/${jobId}.mp4`, inputProps: { project }, concurrency: 2 });
+console.log(JSON.stringify({ jobId, status: 'completed', output: `out/${jobId}.mp4` }));

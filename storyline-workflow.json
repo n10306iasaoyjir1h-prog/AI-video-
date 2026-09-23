@@ -1,0 +1,12 @@
+{
+  "name": "STORYLINE production orchestrator",
+  "nodes": [
+    {"parameters": {"httpMethod": "POST", "path": "storyline-job", "responseMode": "onReceived"}, "id": "webhook", "name": "STORYLINE Job Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [260, 300]},
+    {"parameters": {"jsCode": "const body = $json.body || $json; if ($env.N8N_WEBHOOK_SECRET && body.secret !== $env.N8N_WEBHOOK_SECRET) throw new Error('invalid webhook secret'); return [{ json: { jobId: body.jobId || `job_${Date.now()}`, type: body.type || 'render', projectId: body.projectId, payload: body.payload || {}, receivedAt: new Date().toISOString() } }];"}, "id": "normalize", "name": "Validate and normalize job", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [500, 300]},
+    {"parameters": {"conditions": {"string": [{"value1": "={{$json.type}}", "operation": "equal", "value2": "render"}]}}, "id": "switch", "name": "Route job type", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [740, 300]},
+    {"parameters": {"method": "POST", "url": "={{$env.STORYLINE_CALLBACK_URL || 'http://localhost:4173/api/integrations/job-callback'}}", "sendBody": true, "specifyBody": "json", "jsonBody": "={{JSON.stringify({jobId: $json.jobId, status: 'queued', projectId: $json.projectId, receivedAt: $json.receivedAt})}}"}, "id": "callback", "name": "Acknowledge job", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1000, 300]}
+  ],
+  "connections": {"STORYLINE Job Webhook": {"main": [[{"node": "Validate and normalize job", "type": "main", "index": 0}]]}, "Validate and normalize job": {"main": [[{"node": "Route job type", "type": "main", "index": 0}]]}, "Route job type": {"main": [[{"node": "Acknowledge job", "type": "main", "index": 0}]]}},
+  "active": false,
+  "settings": {"executionOrder": "v1"}
+}

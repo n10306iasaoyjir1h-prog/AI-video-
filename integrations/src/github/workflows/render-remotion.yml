@@ -1,0 +1,36 @@
+name: Render Remotion video
+on:
+  workflow_dispatch:
+    inputs:
+      job_id: { description: 'STORYLINE job ID', required: true, type: string }
+      project_json: { description: 'JSON payload for the composition', required: true, type: string }
+  repository_dispatch:
+    types: [storyline-render]
+permissions:
+  contents: read
+  actions: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        segment: [1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Render with Remotion
+        env:
+          JOB_ID: ${{ inputs.job_id || github.event.client_payload.job_id }}
+          PROJECT_JSON: ${{ inputs.project_json || toJson(github.event.client_payload.project) }}
+        run: |
+          mkdir -p out
+          node integrations/render-remotion.mjs "$JOB_ID" "$PROJECT_JSON"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storyline-${{ inputs.job_id || github.event.client_payload.job_id }}
+          path: out/*.mp4
+          if-no-files-found: error

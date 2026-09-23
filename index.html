@@ -57,8 +57,96 @@
     </main>
   </div>
   <div class="modal-backdrop" id="modal"><div class="modal"><button class="modal-close" id="modal-close">×</button><p class="eyebrow">AUTOMATED CONTENT BRIEF</p><h2>チャンネルの設定だけ入力</h2><p class="modal-lead">タイトル、台本、概要欄、タグはAIが自動で作成します。素材が揃うまで公開は進みません。</p><label>チャンネル<select id="project-channel"><option>夜の余白 / YOHaku</option><option>小さな発見ノート</option><option>新しいチャンネルを作る</option></select></label><label>今回のテーマ・趣旨<textarea id="project-purpose" rows="3" placeholder="例：眠る前の5分に、心が軽くなる話を届ける"></textarea></label><label>雰囲気<select id="project-tone"><option>静かであたたかい</option><option>明るくテンポよく</option><option>知的で落ち着いた</option><option>少し不思議で余韻のある</option></select></label><label>動画の長さ<select id="project-duration"><option value="60">1分</option><option value="180">3分</option><option value="300">5分</option></select></label><button class="new-project full" id="create-project">自動で企画・台本を作成する →</button></div></div>
-  <div class="modal-backdrop" id="production-modal"><div class="modal production-modal"><button class="modal-close" id="production-close">×</button><p class="eyebrow">PRODUCTION BRIEF</p><h2 id="production-title">企画の制作データ</h2><p class="modal-lead">台本と公開情報を整えたら、動画を生成して最終確認へ送ります。</p><label>台本<textarea id="production-script" rows="9" placeholder="ここに台本を入力します。Irodori TTSへ渡す本文になります。"></textarea></label><label>概要欄<textarea id="production-description" rows="4" placeholder="動画の概要欄"></textarea></label><label>ハッシュタグ<input id="production-tags" placeholder="#夜の余白, #朗読, #睡眠前" /></label><label>背景・キャラクター画像<select id="production-image"><option value="">自動選択</option></select></label><label>音声素材<select id="production-audio"><option value="">音声なし</option></select></label><div class="production-actions"><button class="outline-button" id="save-production">保存する</button><button class="outline-button" id="render-video">動画を生成</button><button class="new-project" id="submit-review">最終確認へ送る →</button></div><p class="render-result" id="render-result"></p></div></div>
+  <!-- Enhanced review/production modal -->
+  <div class="modal-backdrop" id="production-modal">
+    <div class="modal production-modal">
+      <button class="modal-close" id="production-close">×</button>
+      <p class="eyebrow">PRODUCTION & REVIEW</p>
+      <h2 id="production-title">企画の制作データ</h2>
+      <p class="modal-lead">台本と公開情報を確認し、動画を生成・レビューします。</p>
+      
+      <!-- Tab navigation -->
+      <div class="review-tabs">
+        <button class="review-tab active" data-tab="script">台本・メタ</button>
+        <button class="review-tab" data-tab="preview">プレビュー</button>
+        <button class="review-tab" data-tab="quality">品質チェック</button>
+      </div>
+      
+      <!-- Tab: Script & Metadata -->
+      <div class="review-tab-content active" id="tab-script">
+        <label>台本<textarea id="production-script" rows="9"></textarea></label>
+        <label>概要欄<textarea id="production-description" rows="4"></textarea></label>
+        <label>ハッシュタグ<input id="production-tags" /></label>
+        <label>背景・キャラクター画像<select id="production-image"><option value="">自動選択</option></select></label>
+        <label>音声素材<select id="production-audio"><option value="">音声なし</option></select></label>
+      </div>
+      
+      <!-- Tab: Preview -->
+      <div class="review-tab-content" id="tab-preview">
+        <div class="preview-grid">
+          <div class="preview-video">
+            <p class="eyebrow">VIDEO PREVIEW</p>
+            <video id="preview-player" controls></video>
+            <p id="preview-empty">動画を生成するとここにプレビューが表示されます</p>
+          </div>
+          <div class="preview-thumbnail">
+            <p class="eyebrow">THUMBNAIL</p>
+            <img id="preview-thumb" alt="サムネイル" />
+            <p id="thumb-empty">サムネイルは動画生成時に自動作成されます</p>
+          </div>
+        </div>
+        <div class="preview-meta">
+          <div class="preview-meta-item">
+            <strong>タイトル</strong>
+            <span id="preview-title-text"></span>
+          </div>
+          <div class="preview-meta-item">
+            <strong>概要欄</strong>
+            <span id="preview-desc-text"></span>
+          </div>
+          <div class="preview-meta-item">
+            <strong>タグ</strong>
+            <span id="preview-tags-text"></span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tab: Quality -->
+      <div class="review-tab-content" id="tab-quality">
+        <div class="quality-overview" id="quality-overview">
+          <div class="quality-score-ring">
+            <span class="quality-score-number" id="quality-score">--</span>
+            <span class="quality-score-label">品質スコア</span>
+          </div>
+          <div class="quality-details" id="quality-details">
+            <p>動画生成後に品質チェック結果が表示されます</p>
+          </div>
+        </div>
+        <div class="quality-issues" id="quality-issues"></div>
+      </div>
+      
+      <!-- Actions -->
+      <div class="production-actions">
+        <button class="outline-button" id="save-production">保存する</button>
+        <button class="outline-button" id="generate-irodori">Irodoriで音声生成</button>
+        <button class="outline-button" id="render-video">動画を生成</button>
+        <button class="new-project" id="approve-review">✓ 承認してYouTubeへ投稿</button>
+        <button class="outline-button reject-button" id="revise-review">✗ 却下・修正依頼</button>
+      </div>
+      <p class="render-result" id="render-result"></p>
+    </div>
+  </div>
   <div class="modal-backdrop" id="channel-modal"><div class="modal"><button class="modal-close" id="channel-close">×</button><p class="eyebrow">CHANNEL AUTOPILOT</p><h2>チャンネルを一度だけ設定</h2><p class="modal-lead">以降はこの設定をもとに、長期戦略と次の企画を自動で作ります。</p><label>チャンネル名<input id="channel-name" placeholder="例：夜の余白 / YOHaku" /></label><label>チャンネルの趣旨<textarea id="channel-purpose" rows="3" placeholder="誰に、何を、どんな価値で届けるか"></textarea></label><label>想定する視聴者<input id="channel-audience" placeholder="眠る前に静かな時間を求める人" /></label><label>世界観<select id="channel-tone"><option>上質で落ち着いた</option><option>明るくテンポよく</option><option>知的でドキュメンタリー調</option><option>少し不思議で余韻のある</option></select></label><label>投稿頻度<select id="channel-cadence"><option>週2本</option><option>週3本</option><option>毎日</option></select></label><label>標準動画尺<select id="channel-duration"><option value="60">1分</option><option value="180">3分</option><option value="300">5分</option></select></label><button class="new-project full" id="save-channel">設定して自動運転を開始 →</button></div></div>
+  <div class="modal-backdrop" id="feedback-modal">
+    <div class="modal">
+      <button class="modal-close" id="feedback-close">×</button>
+      <p class="eyebrow">REVISION FEEDBACK</p>
+      <h2>修正内容を入力</h2>
+      <p class="modal-lead">フィードバックに基づいて動画を自動で再生成します。</p>
+      <label>改善してほしい点<textarea id="revision-feedback" rows="5" placeholder="例：冒頭のテンポが遅い、BGMの音量を上げてほしい、テロップが読みにくい"></textarea></label>
+      <button class="new-project full" id="submit-revision">修正を依頼して再生成 →</button>
+    </div>
+  </div>
   <div class="toast" id="toast"><span class="toast-check">✓</span><div><strong id="toast-title">保存しました</strong><small id="toast-message">変更内容を反映しました。</small></div></div>
   <script src="app.js?v=20260921-8"></script>
 </body>
